@@ -1,5 +1,5 @@
 # Wordom
-A Word Game Inspired by Wordle
+A Word Game Inspired by Wordle.
 
 dict1.text is a dictionary that was found from the link below:
 

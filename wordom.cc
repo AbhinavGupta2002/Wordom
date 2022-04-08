@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include <time.h>
+#include <utility>
 #include "Escape_Sequences_Colors.h"
 using namespace std;
 vector<string> dictionary;
@@ -49,7 +50,7 @@ void setLetter(string guess, string& word, int position) {
 void printBoard(vector<string> attempts, string word) {
     cout << COLOR_BOLD;
     cout << "---------------------" << endl;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         string temp_word = word;
         if (i >= attempts.size() || attempts[i].size() == 0) {
             cout << "|   |   |   |   |   |";
@@ -97,18 +98,28 @@ void resetGame(vector<string>& attempts) {
     cout << endl << endl << endl << endl << endl;
 }
 
+// dictionary must be set before calling this
+bool isWord(std::string word) {
+    for (int i = 0; i < dictionary_size; ++i) {
+        if (word == dictionary[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // checks if user-made guess is a valid entry
-bool validGuess(string word) {
+std::pair<bool, std::string> validGuess(string word) {
     if (word.size() != 5) {
-        return false;
+        return std::make_pair(false, "Input Must Be 5 Letters. Try Again!");
     }
     for (int i = 0; i < 5; ++i) {
         int ascii_value = (int)word[i];
         if (ascii_value < 65 || ascii_value > 90) {
-            return false;
+            return std::make_pair(false, "Invalid Input. Try Again!");
         }
     }
-    return true;
+    return std::make_pair(isWord(word), "Input Is Not A Word In The Dictionary. Try Again!");
 }
 
 // sets the dictionary of 5-letter words that are in uppercase letters
@@ -137,20 +148,23 @@ int main() {
     srand (time(NULL));
     vector<string> attempts;
     while (true) {
-        clearScreen();
-        printIntro();
         bool playAgain = false;
         bool winner = false;
         int index = rand() % dictionary_size + 1;
         --index;
         string word = dictionary[index]; // a 5-letter word is chosen randomly from dictionary
         int i = 1;
-        while (i <= 5) {
+        clearScreen();
+        printIntro();
+        printBoard(attempts, word);
+        std::cout << endl;
+        while (i <= 6) {
             string guess;
             cout << "Attempt " << i << ": ";
             cin >> guess;
-            if (validGuess(guess) == false) {
-                cout << "Invalid Entry. Try Again!" << endl;
+            std::pair <bool, std::string> decision = validGuess(guess);
+            if (decision.first == false) {
+                cout << decision.second << endl;
                 continue;
             }
             cout << endl;
@@ -170,17 +184,17 @@ int main() {
             cout << COLOR_GREEN_NORMAL << "You Won!" << endl;
         } else {
             cout << COLOR_RED_NORMAL << "You Lost!" << endl << endl;
-            cout << COLOR_NORMAL << COLOR_BOLD << "The Answer was " << COLOR_MAGENTA_NORMAL << word << endl;
+            cout << COLOR_NORMAL << COLOR_BOLD << "The Answer Was " << COLOR_MAGENTA_NORMAL << word << endl;
         }
         cout << COLOR_NORMAL << endl << endl;
         while(true) {
             string input;
-            cout << "Would you like to play again? (y/n)" << endl;
+            cout << "Would You Like To Play Again? (yes/no)" << endl;
             cin >> input;
-            if (input == "y") {
+            if (input == "yes") {
                 playAgain = true;
                 break;
-            } else if (input == "n") {
+            } else if (input == "no") {
                 break;
             }
             cout << "Invalid Input. Try Again!" << endl;
